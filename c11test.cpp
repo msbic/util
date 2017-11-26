@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include <cstdio>
 #include <string>
 #include <memory>
@@ -10,6 +9,9 @@
 #include <thread>
 #include <mutex>
 #include <future>
+#include <limits>
+#include <typeinfo>
+#include <iostream>
 
 using std::string;
 using std::vector;
@@ -288,6 +290,88 @@ void TestSharedPtr()
 //	printf("const number = %d\n", nNumber);
 //}
 
+using byte = unsigned char;
+
+// Create type aliases
+//
+void TestTypeAliases()
+{
+  printf("\nIn %s\n", __FUNCTION__);
+  vector<byte> v {0,1,2,3};
+  vector<unsigned char> u {0,1,2,3};
+  printf("lists equal: %d\n",(u == v));
+}
+
+
+using std::string_view;
+
+void StringViewHelper(string_view sv)
+{
+  printf("string view: %s\n", sv);
+}
+
+using namespace std::string_literals;
+
+// string_view / string_literals test
+void TestStringView()
+{
+  printf("\nIn %s\n", __FUNCTION__);
+  auto s { "Mickey Mouse"s };
+  StringViewHelper(s);
+}
+
+
+//
+// string <-> num conversion
+// functions are in stdlib
+void TestStringNumConversion()
+{
+  printf("\nIn %s\n", __FUNCTION__);
+  int i = std::stoi("10");
+  printf("i = %d\n", i);
+  int hex = std::stoi("0xA", nullptr, 16);
+  printf("hex = %d\n", hex);
+  float f = std::stof("0.5");
+  printf("f = %.2f\n", f);
+  printf("%s %s\n", std::to_string(0.5).c_str(), std::to_string(25).c_str());
+  
+}
+
+
+using std::numeric_limits;
+using std::cout;
+using std::endl;
+
+template<class T>
+void PrintNumericLimits(T t)
+{
+  cout << endl << "Properties of: " << typeid(T).name() << endl;
+  cout << "min: " << numeric_limits<T>::min() << endl;
+  cout << "max: " << numeric_limits<T>::max() << endl;
+  cout << "digits: " << numeric_limits<T>::digits << endl;
+  cout << "digits10: " << numeric_limits<T>::digits10 << endl;
+  cout << "is integer: " << numeric_limits<T>::is_integer << endl;
+  cout << "is signed: " << numeric_limits<T>::is_signed << endl;
+  cout << "is exact: " << numeric_limits<T>::is_exact << endl;
+}
+
+void TestNumericLimits()
+{
+  printf("\nIn %s\n", __FUNCTION__);
+  bool bb;
+  int ii;
+  long ll;
+  float ff;
+  double dd;
+  unsigned long long ull;
+  PrintNumericLimits(bb);
+  PrintNumericLimits(ii);
+  PrintNumericLimits(ll);
+  PrintNumericLimits(ff);
+  PrintNumericLimits(dd);
+  PrintNumericLimits(ull);
+}
+
 // Demostrates std::function usage
 // std::function is safer than function pointers
 // and more convenient than a struct with operator()
@@ -308,7 +392,11 @@ void TestStdFunction()
 		TestUniquePtrInVector,
 		TestThreadAndLambda,
 		TestAsync,
-		TestSharedPtr
+		TestSharedPtr,
+    TestTypeAliases,
+    TestStringView,
+    TestStringNumConversion,
+    TestNumericLimits
 	};
 
 	for (auto& f : functionList)
@@ -326,7 +414,7 @@ int main(int argc, char const *argv[])
 {
 	TestStdFunction();
 	
-	int x;
-	scanf_s("%d", &x);
+  //	int x;
+	//scanf_s("%d", &x);
 	return 0;
 }

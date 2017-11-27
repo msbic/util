@@ -355,6 +355,8 @@ void PrintNumericLimits(T t)
   cout << "is exact: " << numeric_limits<T>::is_exact << endl;
 }
 
+//
+// Test numeric limits in stdlib
 void TestNumericLimits()
 {
   printf("\nIn %s\n", __FUNCTION__);
@@ -371,6 +373,27 @@ void TestNumericLimits()
   PrintNumericLimits(dd);
   PrintNumericLimits(ull);
 }
+
+
+template<class T>
+void PrintTest(T t)
+{
+  cout << " " << t << endl;
+}
+
+template<class T, class ... Ts>
+void PrintTest(T head, Ts ... rest)
+{
+  cout << " " << head;
+  PrintTest(rest...);
+}
+
+void TestVariadicTemplate()
+{
+  printf("\nIn %s\n", __FUNCTION__);
+  PrintTest(0, "MyName", 3.5, "~~~");
+}
+
 
 // Demostrates std::function usage
 // std::function is safer than function pointers
@@ -396,7 +419,8 @@ void TestStdFunction()
     TestTypeAliases,
     TestStringView,
     TestStringNumConversion,
-    TestNumericLimits
+    TestNumericLimits,
+    TestVariadicTemplate
 	};
 
 	for (auto& f : functionList)

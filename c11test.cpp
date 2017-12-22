@@ -13,6 +13,7 @@
 #include <typeinfo>
 #include <iostream>
 
+
 using std::string;
 using std::vector;
 using std::function;
@@ -394,6 +395,56 @@ void TestVariadicTemplate()
   PrintTest(0, "MyName", 3.5, "~~~");
 }
 
+// unary left fold
+template<typename... Ts>
+auto add(Ts... args)
+{
+  return (... + args);
+}
+
+template<typename... Ts>
+auto add_to_one(Ts... args)
+{
+  return (1 + ... + args);
+}
+
+void TestVariadicFold()
+{
+  printf("\nIn %s\n", __FUNCTION__);
+  printf("unary add: %d\n", add(1,2,3,4));
+  printf("binary add: %d\n", add_to_one(1,2,3,4));
+}
+
+template <typename T>
+class pod_wrapper
+{
+  /* std::is_pod is defined in <type_traints> */
+  static_assert(std::is_pod<T>::value, "POD type expected");
+
+  T value;
+};
+
+template<typename T>
+auto mul(T const a, T const b)
+{
+  static_assert(std::is_integral<T>::value, "Integral type expected");
+  return a * b;
+}
+
+void TestStaticAssert()
+{
+  printf("\nIn %s\n", __FUNCTION__);
+  /* Will not compile */
+  /*pod_wrapper<std::string> p;*/
+
+  pod_wrapper<int> i;
+
+  auto v = mul(1, 2);
+
+  /* Will not compile */
+  /*  auto v2 = mul(1.0, 2.0);*/
+}
+
 
 // Demostrates std::function usage
 // std::function is safer than function pointers
@@ -416,11 +467,13 @@ void TestStdFunction()
 		TestThreadAndLambda,
 		TestAsync,
 		TestSharedPtr,
-    TestTypeAliases,
-    TestStringView,
-    TestStringNumConversion,
-    TestNumericLimits,
-    TestVariadicTemplate
+		TestTypeAliases,
+		TestStringView,
+		TestStringNumConversion,
+		TestNumericLimits,
+		TestVariadicTemplate,
+		TestVariadicFold,
+		TestStaticAssert
 	};
 
 	for (auto& f : functionList)

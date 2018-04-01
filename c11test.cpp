@@ -12,7 +12,9 @@
 #include <limits>
 #include <typeinfo>
 #include <iostream>
-
+#include <chrono>
+#include <any>
+#include <optional>
 
 using std::string;
 using std::vector;
@@ -23,6 +25,11 @@ using std::unique_ptr;
 using std::thread;
 using std::shared_ptr;
 using std::future;
+using std::any;
+using std::optional;
+using std::cout;
+using std::endl;
+
 
 /*----------------------------------------
   Demonstrates some of the features
@@ -72,16 +79,17 @@ private:
 class Test
 {
 public:
-	Test(int nAge) : m_nAge(nAge) {}
-	Test(const string& strAge) : Test(std::stoi(strAge)) {} // Delegating constructor
-	string GetFullNameAndAge () const
-	{
-		return m_strFirstName + " " + m_strLastName + " " + std::to_string(m_nAge); 
-	}
+  Test(int nAge) : m_nAge(nAge) {}
+  Test(const string& strAge) : Test(std::stoi(strAge)) {} // Delegating constructor
+  string GetFullNameAndAge () const
+  {
+    return m_strFirstName + " " + m_strLastName + " " + std::to_string(m_nAge); 
+  }
+  ~Test() { cout << __FUNCTION__ << endl; }
 private:
-	string m_strFirstName = "Miguel"; // In class member initialization
-	string m_strLastName = "Cervantez";
-	int m_nAge = 200;
+  string m_strFirstName = "Miguel"; // In class member initialization
+  string m_strLastName = "Cervantez";
+  int m_nAge = 200;
 };
 
 void TestDelegatingConstructor()
@@ -340,8 +348,6 @@ void TestStringNumConversion()
 
 
 using std::numeric_limits;
-using std::cout;
-using std::endl;
 
 template<class T>
 void PrintNumericLimits(T t)
@@ -446,40 +452,90 @@ void TestStaticAssert()
 }
 
 
+using namespace std::chrono_literals;
+
+void TestChronoDuration()
+{
+  std::chrono::hours halfDay(12);
+  std::chrono::seconds halfMinute(30);
+  std::chrono::milliseconds halfSecond(500);
+
+  //auto halfHour = 30min;
+  //auto halfMinute = 30s;
+  //auto halfSecond = 500ms;
+}
+
+void TestAny()
+{
+  cout << "In " << __FUNCTION__ << endl;
+  any a(45);
+  cout << std::any_cast<int>(a) <<  endl;
+  cout << "Is type of a int? " << (a.type() == typeid(int)) << endl;
+  cout << "a has value? " << (a.has_value()) << endl;
+
+  shared_ptr<Test> t(new Test(0));
+  any b(t);
+  cout << "b has value? " << (b.has_value()) << endl;
+}
+
+void TestOptional()
+{
+  cout << "In " << __FUNCTION__ << endl;
+  optional<int> v1;
+
+  if (v1)
+  {
+    cout << *v1 << endl;
+  }
+  else
+  {
+    cout << "none" << endl;
+  }
+
+  optional < shared_ptr <Test> > t;
+  if (t)
+    cout << "true " << endl;
+  else
+    cout << " false " << endl;
+}
+
 // Demostrates std::function usage
 // std::function is safer than function pointers
 // and more convenient than a struct with operator()
 void TestStdFunction()
 {	
 	vector<function<void()>> functionList =
-	{
-		TestRawLiterals,
-		TestClassInitializer,
-		TestDelegatingConstructor,
-		TestOverrideAndUniqPtr,
-		TestAutoAndVectorInitList,
-		TestMemFn,
-		TestLambdaAndArray,
-		TestTuple,
-		TestEnumClass,
-		TestMove,
-		TestUniquePtrInVector,
-		TestThreadAndLambda,
-		TestAsync,
-		TestSharedPtr,
-		TestTypeAliases,
-		TestStringView,
-		TestStringNumConversion,
-		TestNumericLimits,
-		TestVariadicTemplate,
-		TestVariadicFold,
-		TestStaticAssert
-	};
+	  {
+	    TestRawLiterals,
+	    TestClassInitializer,
+	    TestDelegatingConstructor,
+	    TestOverrideAndUniqPtr,
+	    TestAutoAndVectorInitList,
+	    TestMemFn,
+	    TestLambdaAndArray,
+	    TestTuple,
+	    TestEnumClass,
+	    TestMove,
+	    TestUniquePtrInVector,
+	    TestThreadAndLambda,
+	    TestAsync,
+	    TestSharedPtr,
+	    TestTypeAliases,
+	    TestStringView,
+	    TestStringNumConversion,
+	    TestNumericLimits,
+	    TestVariadicTemplate,
+	    TestVariadicFold,
+	    TestStaticAssert,
+	    TestChronoDuration,
+	    TestAny,
+	    TestOptional
+	  };
 
 	for (auto& f : functionList)
-	{
-		f();
-	}
+	  {
+	    f();
+	  }
 
 	//for (auto& v = functionList.begin(); v != functionList.end(); ++v)
 	//{
@@ -489,9 +545,9 @@ void TestStdFunction()
 
 int main(int argc, char const *argv[])
 {
-	TestStdFunction();
+  TestStdFunction();
 	
   //	int x;
-	//scanf_s("%d", &x);
-	return 0;
+  //scanf_s("%d", &x);
+  return 0;
 }

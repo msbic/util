@@ -15,6 +15,7 @@
 #include <chrono>
 #include <any>
 #include <optional>
+#include <variant>
 
 using std::string;
 using std::vector;
@@ -27,6 +28,7 @@ using std::shared_ptr;
 using std::future;
 using std::any;
 using std::optional;
+using std::variant;
 using std::cout;
 using std::endl;
 
@@ -496,7 +498,29 @@ void TestOptional()
   if (t)
     cout << "true " << endl;
   else
-    cout << " false " << endl;
+    cout << "false " << endl;
+  
+}
+
+
+void TestVariant()
+{
+  cout << "In " << __FUNCTION__ << endl;
+  variant<int, double, string> v = 42;
+
+  auto i1 = std::get<int>(v);
+  auto i2 = std::get<0>(v);
+
+  cout << (i1 == i2) << endl;
+
+  cout << "index " << v.index() << endl;
+
+  v = "42";
+
+  cout << "index " << v.index() << endl;
+
+  std::visit(
+	     [](auto&& arg) { std::cout << arg << std::endl; }, v);
 }
 
 // Demostrates std::function usage
@@ -529,7 +553,8 @@ void TestStdFunction()
 	    TestStaticAssert,
 	    TestChronoDuration,
 	    TestAny,
-	    TestOptional
+	    TestOptional,
+	    TestVariant
 	  };
 
 	for (auto& f : functionList)

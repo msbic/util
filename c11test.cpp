@@ -16,6 +16,7 @@
 #include <any>
 #include <optional>
 #include <variant>
+#include <locale>
 
 using std::string;
 using std::vector;
@@ -523,55 +524,139 @@ void TestVariant()
 	     [](auto&& arg) { std::cout << arg << std::endl; }, v);
 }
 
+struct foo
+{
+  string serialize()
+  {
+    return "plain"s;
+  }
+};
+
+struct bar
+{
+  string serializeWithEncoding()
+  {
+    return "encoded"s;
+  }
+};
+
+template <class T>
+struct is_serializable_with_encoding
+{
+  static const bool value = false;
+};
+
+template <>
+struct is_serializable_with_encoding<bar>
+{
+  static const bool value = true;
+};
+
+template <bool b>
+struct serializer
+{
+  template <class T>
+  static auto serialize(T& v)
+  {
+    v.serialize();
+  }
+};
+
+template <>
+struct serializer<true>
+{
+  template <class T>
+  static auto serialize(T& v)
+  {
+    return v.serializeWithEncoding();
+  }
+};
+
+template <class T>
+auto serialize(T& v)
+{
+  return serializer<is_serializable_with_encoding<T>::value>::serialize(v);
+}
+
+void TestCustomTypeTraits()
+{
+  cout << "In " << __FUNCTION__ << endl;
+  bar b;
+  cout << serialize(b) << endl;
+}
+
+void TestConditional()
+{
+  cout << "In " << __FUNCTION__ << endl;
+
+  // Depending on size of the pointer
+  // type choose long or long long
+  using long_type =
+    std::conditional<
+    sizeof(void*) <= 4,
+    long,
+      long long>::type;
+
+  // True on 64 bit OS
+  static_assert(sizeof(long_type) == 8);
+}
+
 // Demostrates std::function usage
 // std::function is safer than function pointers
 // and more convenient than a struct with operator()
 void TestStdFunction()
 {	
-	vector<function<void()>> functionList =
-	  {
-	    TestRawLiterals,
-	    TestClassInitializer,
-	    TestDelegatingConstructor,
-	    TestOverrideAndUniqPtr,
-	    TestAutoAndVectorInitList,
-	    TestMemFn,
-	    TestLambdaAndArray,
-	    TestTuple,
-	    TestEnumClass,
-	    TestMove,
-	    TestUniquePtrInVector,
-	    TestThreadAndLambda,
-	    TestAsync,
-	    TestSharedPtr,
-	    TestTypeAliases,
-	    TestStringView,
-	    TestStringNumConversion,
-	    TestNumericLimits,
-	    TestVariadicTemplate,
-	    TestVariadicFold,
-	    TestStaticAssert,
-	    TestChronoDuration,
-	    TestAny,
-	    TestOptional,
-	    TestVariant
-	  };
+  vector<function<void()>> functionList =
+    {
+      TestRawLiterals,
+      TestClassInitializer,
+      TestDelegatingConstructor,
+      TestOverrideAndUniqPtr,
+      TestAutoAndVectorInitList,
+      TestMemFn,
+      TestLambdaAndArray,
+      TestTuple,
+      TestEnumClass,
+      TestMove,
+      TestUniquePtrInVector,
+      TestThreadAndLambda,
+      TestAsync,
+      TestSharedPtr,
+      TestTypeAliases,
+      TestStringView,
+      TestStringNumConversion,
+      TestNumericLimits,
+      TestVariadicTemplate,
+      TestVariadicFold,
+      TestStaticAssert,
+      TestChronoDuration,
+      TestAny,
+      TestOptional,
+      TestVariant,
+      TestCustomTypeTraits,
+      TestConditional
+    };
 
-	for (auto& f : functionList)
-	  {
-	    f();
-	  }
+  for (auto& f : functionList)
+    {
+      f();
+    }
 
-	//for (auto& v = functionList.begin(); v != functionList.end(); ++v)
-	//{
-	//	v->operator()();
-	//}
+  //for (auto& v = functionList.begin(); v != functionList.end(); ++v)
+  //{
+  //	v->operator()();
+  //}
 }
 
 int main(int argc, char const *argv[])
 {
+
   TestStdFunction();
+
+  std::locale lc = std::locale{};
 	
+  cout << lc.name() << std::endl;
+  
   //	int x;
   //scanf_s("%d", &x);
   return 0;

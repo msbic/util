@@ -283,6 +283,34 @@ void TestAsync()
 	
 }
 
+class AsyncTester
+{
+ public:
+  AsyncTester() {}
+  void LongRunningRoutine()
+  {
+    auto thid = std::this_thread::get_id();
+    printf("\nIn %s worker thread id: 0x%x\n", __FUNCTION__, thid);
+    for(int i = 0; i < 1000; ++i)
+    {
+      printf("Doing work in thread 0x%x\n", thid);
+    }
+  }
+};
+
+void TestAsyncWithClass()
+{
+  auto thid = std::this_thread::get_id();
+  printf("\nIn %s main  thread id: 0x%x\n", __FUNCTION__, thid);
+  AsyncTester* t = new AsyncTester;
+  auto res = std::async(std::launch::async, &AsyncTester::LongRunningRoutine, t);
+  printf("\nIn %s  in main thread id: 0x%x - waiting!\n", __FUNCTION__, thid);
+										res.get();
+  printf("\nIn %s in main  thread id: 0x%x - worker finished\n", __FUNCTION__, thid);
+
+  delete t;
+}
+
 void TestSharedPtr()
 {
 	printf("\nIn %s\n", __FUNCTION__);
@@ -634,7 +662,8 @@ void TestStdFunction()
       TestOptional,
       TestVariant,
       TestCustomTypeTraits,
-      TestConditional
+      TestConditional,
+      TestAsyncWithClass
     };
 
   for (auto& f : functionList)
